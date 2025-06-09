@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 const {Schema} = mongoose
-const ObjectId = mongoose.Types.ObjectId; 
 
 const UserSchema = new Schema({
     first_name : {
@@ -24,6 +23,10 @@ const UserSchema = new Schema({
     password:{
         type: String, 
         required: true
+    },
+    createdAt :{
+        type : Date, 
+        default : Date.now
     }
 });
 

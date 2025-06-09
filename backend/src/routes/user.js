@@ -2,7 +2,7 @@ import { Router } from "express";
 import { UserModel } from "../model/userSchema.js";
 import { signUpSchema } from "../zod/signUpSchema.js";
 import bcrypt from "bcrypt";
-import middleware from "../middleware/middelware.js";
+import middleware from "../middleware/middleware.js";
 import { StatusCode } from "../../StatusCodes/StatusCode.js";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/secret.js";
@@ -13,7 +13,6 @@ UserRoute.post("/signup", async (req, res) => {
   if (!success) {
     return res.status(StatusCode.BAD_REQUEST).json({
       message: "Validation failed",
-      errors: parsed.error.flatten().fieldErrors,
     });
   }
   const { first_name, last_name, username, email, password } = req.body;
@@ -49,7 +48,7 @@ UserRoute.post("/signup", async (req, res) => {
 
 UserRoute.post("/signin", async (req, res) => {
   const { username, password } = req.body;
-  
+
   try {
     const response = await UserModel.findOne({
       username,
@@ -115,6 +114,31 @@ UserRoute.put("/changePassword", middleware, async (req, res) => {
       message: error.toString(),
     });
   }
+});
+
+UserRoute.get("/bulk", async (req, res) => {
+  const filter = req.query.filter || "";
+
+  const users = await UserModel.find({
+    $or: [{
+      first_name: {
+          $regex: filter,
+        }
+      },
+      {
+        last_name: {
+          $regex: filter,
+        }
+      }]
+  });
+});
+res.status(StatusCode.FOUND).json({
+  user : user.map(user=>({
+      username: user.username,
+      first_name: user.first_name,
+      last_name: user.last_name, 
+      _id : user._id
+  }))
 });
 
 export { UserRoute };
