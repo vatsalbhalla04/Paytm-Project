@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { UserRoute } from "./src/routes/user.js"; // ✅ include .js extension
+import { UserRoute } from "./src/routes/user.js"; 
+import { AccountRouter } from "./src/routes/account.js";
+import middleware from "./src/middleware/middleware.js";
 
 dotenv.config();
 
@@ -13,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/user", UserRoute);
+app.use("/api/v1/acc",middleware,AccountRouter);
 
 async function main() {
   try {

@@ -3,36 +3,49 @@ import { UserModel } from "../model/userSchema.js";
 import { signUpSchema } from "../zod/signUpSchema.js";
 import bcrypt from "bcrypt";
 import middleware from "../middleware/middleware.js";
-import { StatusCode } from "../../StatusCodes/StatusCode.js";
+import { StatusCode } from "../StatusCodes/StatusCode.js";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/secret.js";
+// import { AccountModel } from "../model/accountSchema.js";
 const UserRoute = Router();
 
 UserRoute.post("/signup", async (req, res) => {
   const success = signUpSchema.safeParse(req.body);
+
   if (!success) {
     return res.status(StatusCode.BAD_REQUEST).json({
       message: "Validation failed",
     });
   }
-  const { first_name, last_name, username, email, password } = req.body;
+
+  const { first_name, last_name, username, email, password} = req.body;
+
   try {
     const hashPass = await bcrypt.hash(password, 4);
 
-    await UserModel.create({
+    const user = await UserModel.create({
       first_name,
       last_name,
       username,
       email,
       password: hashPass,
     });
+
+    // const finalBal = balance ?? 1+ Math.random()*10000;
+
+    // const account = await AccountModel.create({
+    //   user: user._id,
+    //   balance : finalBal
+    // })
+
     res.status(StatusCode.CREATED).json({
-      message: `Your Account Has been Created ${first_name}!`,
+      message: `Your Account Has been Created ${first_name}! `,
+
     });
   } catch (error) {
     if (error.code === 11000) {
       //error.code === 11000 → MongoDB duplicate key error
-      const duplicatedField = Object.keys(error.keyPatter)[0];
+      const duplicatedField = Object.keys(error.keyPattern)[0];
 
       res.status(StatusCode.CONFLICT).json({
         message: `This ${duplicatedField} is already in use`,
@@ -119,26 +132,35 @@ UserRoute.put("/changePassword", middleware, async (req, res) => {
 UserRoute.get("/bulk", async (req, res) => {
   const filter = req.query.filter || "";
 
-  const users = await UserModel.find({
-    $or: [{
-      first_name: {
-          $regex: filter,
-        }
-      },
-      {
-        last_name: {
-          $regex: filter,
-        }
-      }]
-  });
+  try {
+    const users = await UserModel.find({
+      $or: [{
+        first_name: {
+            $regex: filter,
+          }
+        },
+        {
+          last_name: {
+            $regex: filter,
+          }
+        }]
+    });
+    res.status(StatusCode.FOUND).json({
+      user : users.map(user=>({
+          username: user.username,
+          first_name: user.first_name,
+          last_name: user.last_name, 
+          _id : user._id
+      }))
+    });
+  } catch (error) {
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+      message : error.toString()
+    })
+  }
+
+
 });
-res.status(StatusCode.FOUND).json({
-  user : user.map(user=>({
-      username: user.username,
-      first_name: user.first_name,
-      last_name: user.last_name, 
-      _id : user._id
-  }))
-});
+
 
 export { UserRoute };
