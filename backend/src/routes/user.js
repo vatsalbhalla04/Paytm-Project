@@ -18,7 +18,7 @@ UserRoute.post("/signup", async (req, res) => {
     });
   }
 
-  const { first_name, last_name, username, email, password} = req.body;
+  const { first_name, last_name, username, email, password } = req.body;
 
   try {
     const hashPass = await bcrypt.hash(password, 4);
@@ -33,7 +33,6 @@ UserRoute.post("/signup", async (req, res) => {
 
     res.status(StatusCode.CREATED).json({
       message: `Your Account Has been Created ${first_name}! `,
-
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -101,7 +100,9 @@ UserRoute.post("/addMoney", middleware, async (req, res) => {
       });
     }
 
-    const addMoney = Number.isFinite(paisaDalo) ? paisaDalo : 1 + Math.random() * 10000;
+    const addMoney = Number.isFinite(paisaDalo)
+      ? paisaDalo
+      : 1 + Math.random() * 10000;
 
     const account = await AccountModel.create({
       user: userId,
@@ -112,7 +113,6 @@ UserRoute.post("/addMoney", middleware, async (req, res) => {
       message: "Money added successfully",
       account,
     });
-
   } catch (error) {
     return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
       message: error.toString(),
@@ -160,32 +160,32 @@ UserRoute.get("/bulk", async (req, res) => {
 
   try {
     const users = await UserModel.find({
-      $or: [{
-        first_name: {
+      $or: [
+        {
+          first_name: {
             $regex: filter,
-          }
+          },
         },
         {
           last_name: {
             $regex: filter,
-          }
-        }]
+          },
+        },
+      ],
     });
     res.status(StatusCode.FOUND).json({
-      user : users.map(user=>({
-          username: user.username,
-          first_name: user.first_name,
-          last_name: user.last_name, 
-          _id : user._id
-      }))
+      user: users.map((user) => ({
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        _id: user._id,
+      })),
     });
   } catch (error) {
     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-      message : error.toString()
-    })
+      message: error.toString(),
+    });
   }
-
-
 });
 
 export { UserRoute };

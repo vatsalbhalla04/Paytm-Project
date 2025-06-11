@@ -1,5 +1,5 @@
-import { JWT_SECRET } from "../config/secret.js";              
-import jwt from "jsonwebtoken";                             
+import { JWT_SECRET } from "../config/secret.js";
+import jwt from "jsonwebtoken";
 import { StatusCode } from "../StatusCodes/StatusCode.js";
 
 export default function middleware(req, res, next) {
@@ -13,7 +13,7 @@ export default function middleware(req, res, next) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const verifyUser = jwt.verify(token, JWT_SECRET); 
+    const verifyUser = jwt.verify(token, JWT_SECRET);
 
     if (verifyUser.id) {
       req.userId = verifyUser.id;
