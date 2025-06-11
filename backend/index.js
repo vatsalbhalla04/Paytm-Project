@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/user", UserRoute);
-app.use("/api/v1/acc",middleware,AccountRouter);
+app.use("/api/v1/account",middleware,AccountRouter);
 
 async function main() {
   try {

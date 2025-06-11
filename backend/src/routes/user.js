@@ -6,7 +6,7 @@ import middleware from "../middleware/middleware.js";
 import { StatusCode } from "../StatusCodes/StatusCode.js";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/secret.js";
-// import { AccountModel } from "../model/accountSchema.js";
+import { AccountModel } from "../model/accountSchema.js";
 const UserRoute = Router();
 
 UserRoute.post("/signup", async (req, res) => {
@@ -30,13 +30,6 @@ UserRoute.post("/signup", async (req, res) => {
       email,
       password: hashPass,
     });
-
-    // const finalBal = balance ?? 1+ Math.random()*10000;
-
-    // const account = await AccountModel.create({
-    //   user: user._id,
-    //   balance : finalBal
-    // })
 
     res.status(StatusCode.CREATED).json({
       message: `Your Account Has been Created ${first_name}! `,
@@ -89,6 +82,39 @@ UserRoute.post("/signin", async (req, res) => {
     }
   } catch (error) {
     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+      message: error.toString(),
+    });
+  }
+});
+
+UserRoute.post("/addMoney", middleware, async (req, res) => {
+  const { paisaDalo } = req.body;
+
+  try {
+    const userId = req.userId;
+
+    const foundUser = await UserModel.findOne({ _id: userId });
+
+    if (!foundUser) {
+      return res.status(StatusCode.NOT_FOUND).json({
+        message: "User does not exist",
+      });
+    }
+
+    const addMoney = Number.isFinite(paisaDalo) ? paisaDalo : 1 + Math.random() * 10000;
+
+    const account = await AccountModel.create({
+      user: userId,
+      balance: addMoney,
+    });
+
+    return res.status(StatusCode.CREATED).json({
+      message: "Money added successfully",
+      account,
+    });
+
+  } catch (error) {
+    return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
       message: error.toString(),
     });
   }
@@ -161,6 +187,5 @@ UserRoute.get("/bulk", async (req, res) => {
 
 
 });
-
 
 export { UserRoute };
