@@ -1,5 +1,7 @@
+import { TransferMoney } from "../Components/DashboardComponents/TransferMoney"
+
 export const SendMoney = () => {
   return (
-    <div>SendMoney</div>
+    <div><TransferMoney/></div>
   )
 }
