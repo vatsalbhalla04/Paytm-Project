@@ -6,6 +6,7 @@ export const Dashboard = () => {
   return (
     <div>
       <AppBar/>
+      <hr className="border-t border-gray-200"></hr>
       <Balance/>
       <UsersComponent/>
     </div>
